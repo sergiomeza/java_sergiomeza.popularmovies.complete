@@ -16,7 +16,7 @@
             android:id="@+id/mRecycler"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:divider="#00000000"/>
+            android:divider="#00000000" />
 
         <ProgressBar
             android:id="@+id/mProgressBar"

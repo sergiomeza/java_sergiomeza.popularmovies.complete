@@ -11,4 +11,11 @@
     <string name="error_no_data_detail">The parent activity has not passed any argument</string>
     <string name="top_rated">Top rated</string>
     <string name="popular">Popular</string>
+    <string name="favorite">Favorite</string>
+    <string name="favorites">Favorites</string>
+    <string name="added_to_favorites">%1$s Added to favorites</string>
+    <string name="trailers">Trailers:</string>
+    <string name="play">play</string>
+    <string name="reviews">Reviews</string>
+    <string name="error_no_data">There is not data in %1$s</string>
 </resources>

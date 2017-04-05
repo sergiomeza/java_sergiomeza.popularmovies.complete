@@ -5,6 +5,6 @@ import android.view.View;
 import info.sergiomeza.popularmovies.model.Movie;
 
 //
-public interface OnMovieItemClickListener {
-    void onItemClick(Movie mMovie, View mView);
+public interface OnItemClickListener {
+    void onItemClick(Object mObject, View mView);
 }

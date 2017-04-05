@@ -25,6 +25,11 @@
             android:name=".ui.activity.DetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <provider
+            android:name=".data.MoviesContentProvider"
+            android:authorities="info.sergiomeza.popularmovies"
+            android:exported="false"/>
     </application>
 
 </manifest>

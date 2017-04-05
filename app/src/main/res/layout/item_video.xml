@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:background="?android:attr/selectableItemBackground">
+
+    <ImageView
+        android:id="@+id/mImgVideoPlay"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:padding="15dp"
+        android:clickable="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="@drawable/ic_play_arrow_black_24dp"
+        android:contentDescription="@string/play" />
+
+    <TextView
+        android:id="@+id/mTxtMovieVideoName"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline"
+        android:drawablePadding="5dp"
+        android:textSize="19sp"
+        android:gravity="center_vertical"
+        android:text="@string/trailers"
+        android:layout_weight="1"
+        android:fontFamily="sans-serif-normal" />
+
+</LinearLayout>

@@ -1,6 +1,7 @@
 package info.sergiomeza.popularmovies.ui.activity;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -18,6 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import info.sergiomeza.popularmovies.R;
@@ -25,13 +28,13 @@ import info.sergiomeza.popularmovies.model.ApiResponse;
 import info.sergiomeza.popularmovies.model.Movie;
 import info.sergiomeza.popularmovies.presenter.MainPresenter;
 import info.sergiomeza.popularmovies.ui.adapter.MainAdapter;
-import info.sergiomeza.popularmovies.ui.view.OnMovieItemClickListener;
+import info.sergiomeza.popularmovies.ui.view.OnItemClickListener;
 import info.sergiomeza.popularmovies.ui.view.MainView;
 import info.sergiomeza.popularmovies.util.Const;
 import info.sergiomeza.popularmovies.util.Util;
 
 public class MainActivity extends AppCompatActivity implements MainView,
-        OnMovieItemClickListener {
+        OnItemClickListener {
     //Presenter
     MainPresenter mPresenter;
     //Actual selection
@@ -53,8 +56,9 @@ public class MainActivity extends AppCompatActivity implements MainView,
 
         if(savedInstanceState == null){
             //Init the recyclerView
+            final int columns = getResources().getInteger(R.integer.gallery_columns);
             mRecycler.setHasFixedSize(true);
-            GridLayoutManager mGridLayoutManager = new GridLayoutManager(this, 2);
+            GridLayoutManager mGridLayoutManager = new GridLayoutManager(this, columns);
             mGridLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
             mRecycler.setLayoutManager(mGridLayoutManager);
             mRecycler.setItemAnimator(new DefaultItemAnimator());
@@ -69,7 +73,11 @@ public class MainActivity extends AppCompatActivity implements MainView,
         mSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mPresenter.getMovies(1, true, mMethodSelected);
+                onResume();
+                if(mMethodSelected.equals(Const.ApiMethods.FAVS.getState()))
+                    mPresenter.getFavoriteMovies(true);
+                else
+                    mPresenter.getMovies(1, true, mMethodSelected);
             }
         });
     }
@@ -83,7 +91,10 @@ public class MainActivity extends AppCompatActivity implements MainView,
         /*
          * Calling the presenter with the method selected
          */
-        mPresenter.getMovies(1, false, mMethod);
+        if(mMethod.equals(Const.ApiMethods.FAVS.getState()))
+            mPresenter.getFavoriteMovies(false);
+        else
+            mPresenter.getMovies(1, false, mMethod);
         this.setTitle(mMenuItem.getTitle());
         mMethodSelected = mMethod;
         mMenuItem.setChecked(true);
@@ -117,8 +128,20 @@ public class MainActivity extends AppCompatActivity implements MainView,
             case R.id.menu_top_rated:
                 setSelection(item, Const.ApiMethods.TOP_RATED.getState());
                 break;
+
+            case R.id.menu_favorites:
+                setSelection(item, Const.ApiMethods.FAVS.getState());
+                break;
         }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        final int columns = getResources().getInteger(R.integer.gallery_columns);
+        mRecycler.setLayoutManager(new GridLayoutManager(this, columns));
     }
 
     @Override
@@ -164,6 +187,16 @@ public class MainActivity extends AppCompatActivity implements MainView,
         }
     }
 
+    @Override
+    public void onFavoritesSuccess(List<Movie> mFavorites) {
+        Log.i("FAVS", mFavorites.size() + "");
+        if(!mFavorites.isEmpty()){
+            mAdapter = new MainAdapter(this, mFavorites);
+            mRecycler.setAdapter(mAdapter);
+            mRecycler.getAdapter().notifyDataSetChanged();
+        }
+    }
+
     /**
      * @param mErrorMessage Error message displayed in the view
      */
@@ -182,9 +215,9 @@ public class MainActivity extends AppCompatActivity implements MainView,
      * When a movie is clicked
      */
     @Override
-    public void onItemClick(Movie mMovie, View mView) {
+    public void onItemClick(Object mMovie, View mView) {
         Intent mIntentDetail = new Intent(this, DetailActivity.class);
-        mIntentDetail.putExtra(Const.DETAIL_DATA, mMovie);
+        mIntentDetail.putExtra(Const.DETAIL_DATA, (Movie)mMovie);
         ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
                 mView, getString(R.string.transition_image));
         ActivityCompat.startActivity(this,

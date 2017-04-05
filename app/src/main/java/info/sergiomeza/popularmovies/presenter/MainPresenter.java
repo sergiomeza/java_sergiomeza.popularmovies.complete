@@ -1,10 +1,19 @@
 package info.sergiomeza.popularmovies.presenter;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.util.Log;
+
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import info.sergiomeza.popularmovies.Api;
 import info.sergiomeza.popularmovies.R;
+import info.sergiomeza.popularmovies.data.MoviesContract;
 import info.sergiomeza.popularmovies.model.ApiResponse;
+import info.sergiomeza.popularmovies.model.Movie;
 import info.sergiomeza.popularmovies.ui.view.MainView;
 import info.sergiomeza.popularmovies.util.Const;
 import info.sergiomeza.popularmovies.util.Util;
@@ -90,5 +99,42 @@ public class MainPresenter {
              */
             mMainView.onRequestError(mContext.getString(R.string.error_no_internet));
         }
+    }
+
+    /**
+     * @param mRefresh
+     * Get the movies marked as favorites
+     */
+    public final void getFavoriteMovies(final boolean mRefresh){
+        this.mMainView.showLoading(mRefresh);
+        Gson mGson = new Gson();
+        List<Movie> mFavorites = new ArrayList<>();
+        boolean mResponse;
+        try {
+            Cursor mCursor = mContext.getContentResolver()
+                    .query(MoviesContract.FavoritesEntry.CONTENT_URI, null, null, null, null);
+            if(mCursor.getCount() > 0) {
+                Log.i("CURSOS", "ENTRA");
+                while (mCursor.moveToNext()) {
+                    Movie mMovie = mGson.fromJson(mCursor.getString(
+                            mCursor.getColumnIndex(MoviesContract.FavoritesEntry.COLUMN_MOVIE_DATA)),
+                            Movie.class);
+                    mFavorites.add(mMovie);
+                }
+                mMainView.onFavoritesSuccess(mFavorites);
+                mResponse = false;
+            }
+            else {
+                mResponse = true;
+                mMainView.onRequestError(mContext.getString(R.string.error_no_data,
+                        mContext.getString(R.string.favorites)));
+            }
+        } catch (Exception mException){
+            mResponse = true;
+            mMainView.onRequestError(mContext.getString(R.string.error_request,
+                    mException.getCause()));
+        }
+
+        mMainView.hideLoading(mResponse);
     }
 }

@@ -21,4 +21,13 @@
     <style name="Widget.ActionButton.Overflow" parent="@android:style/Widget.Holo.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_sort_white_24dp</item>
     </style>
+
+    <style name="TextTitle">
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Headline</item>
+        <item name="android:textSize">19sp</item>
+        <item name="android:fontFamily">sans-serif-normal</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:textColor">@android:color/darker_gray</item>
+    </style>
 </resources>

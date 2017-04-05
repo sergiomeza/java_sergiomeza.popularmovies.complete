@@ -131,6 +131,45 @@
                     android:textSize="18sp"
                     android:paddingTop="10dp"
                     android:fontFamily="sans-serif-normal" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="#e0e0e0"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/TextTitle"
+                    android:text="@string/trailers" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/mRecyclerVideos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="#e0e0e0" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="#e0e0e0"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/TextTitle"
+                    android:text="@string/reviews"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/mRecyclerReviews"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="#e0e0e0" />
+
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>
     </LinearLayout>
