@@ -22,5 +22,7 @@ public interface DetailView {
 
     void onFavoriteAdded(String mUri);
 
+    void isFavorite(boolean mFav);
+
     void onFavoriteDeleted(boolean mError);
 }

@@ -1,15 +1,19 @@
 package info.sergiomeza.popularmovies.presenter;
 
+import android.content.AsyncQueryHandler;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-
+import android.os.Handler;
+import android.os.Looper;
 import com.google.gson.Gson;
+
 import info.sergiomeza.popularmovies.Api;
 import info.sergiomeza.popularmovies.R;
+import info.sergiomeza.popularmovies.data.AsyncQueryHandlerDetail;
 import info.sergiomeza.popularmovies.data.MoviesContract;
 import info.sergiomeza.popularmovies.model.ApiCombined;
 import info.sergiomeza.popularmovies.model.ApiResponseReviews;
@@ -37,6 +41,11 @@ public class DetailPresenter {
     private Context mContext;
     private Api api;
 
+    private final int GET_OPERATION = 11;
+    private final int DELETE_OPERATION = 12;
+    private final int ADD_OPERATION = 13;
+    private AsyncQueryHandlerDetail mQueryHandler;
+
     public DetailPresenter(DetailView mDetailView, Context mContext) {
         this.mDetailView = mDetailView;
         this.mContext = mContext;
@@ -50,6 +59,10 @@ public class DetailPresenter {
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
                 .create(Api.class);
+
+        //Async query handler for the View
+        mQueryHandler = new AsyncQueryHandlerDetail(mContext.getContentResolver(),
+                mDetailView);
     }
 
     /**
@@ -74,10 +87,8 @@ public class DetailPresenter {
         mCv.put(MoviesContract.FavoritesEntry.COLUMN_MOVIE_ID, mMovie.getId());
         //I'm Saving the Movie Movie in JSON format to avoid the creation of every Column
         mCv.put(MoviesContract.FavoritesEntry.COLUMN_MOVIE_DATA, new Gson().toJson(mMovie));
-        Uri uri = mContext.getContentResolver().insert(MoviesContract.FavoritesEntry.CONTENT_URI, mCv);
-        if(uri != null) {
-            mDetailView.onFavoriteAdded(uri.toString());
-        }
+        //Calling the async handler
+        mQueryHandler.startInsert(ADD_OPERATION, null, MoviesContract.FavoritesEntry.CONTENT_URI, mCv);
     }
 
     /**
@@ -85,15 +96,9 @@ public class DetailPresenter {
      * @return
      * Check if the movie is already a favorite movie
      */
-    public Boolean getIffavorite(int mMovieId){
+    public void getIffavorite(int mMovieId){
         Uri mUri = ContentUris.withAppendedId(MoviesContract.FavoritesEntry.CONTENT_URI, mMovieId);
-        try {
-            Cursor mCursor = mContext.getContentResolver()
-                    .query(mUri, null, null, null, null);
-            return mCursor.moveToNext();
-        } catch (Exception mException){
-            return false;
-        }
+        mQueryHandler.startQuery(GET_OPERATION, null, mUri, null, null, null, null);
     }
 
     /**
@@ -102,10 +107,7 @@ public class DetailPresenter {
      */
     public void removeFromfavorite(int mMovieId){
         Uri mUri = ContentUris.withAppendedId(MoviesContract.FavoritesEntry.CONTENT_URI, mMovieId);
-        if(mContext.getContentResolver().delete(mUri, null, null) > 0)
-            mDetailView.onFavoriteDeleted(false);
-        else
-            mDetailView.onFavoriteDeleted(true);
+        mQueryHandler.startDelete(DELETE_OPERATION, null, mUri, null, null);
     }
 
     /**

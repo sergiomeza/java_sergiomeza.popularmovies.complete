@@ -13,6 +13,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -68,31 +69,32 @@ public class DetailActivity extends AppCompatActivity implements DetailView, OnI
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
+        /**
+         * Initialize the toolbar
+         */
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                supportFinishAfterTransition();
+            }
+        });
+
+        /**
+         * Video and review Recyclers
+         */
+        initRecycler(mRecyclerVideos, mVideoAdapter);
+        initRecycler(mRecyclerReviews, mReviewAdapter);
+
         if (savedInstanceState == null) {
-            /**
-             * Initialize the toolbar
-             */
-            setSupportActionBar(mToolbar);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    supportFinishAfterTransition();
-                }
-            });
-
-            /**
-             * Video and review Recyclers
-             */
-            initRecycler(mRecyclerVideos, mVideoAdapter);
-            initRecycler(mRecyclerReviews, mReviewAdapter);
-
-            /**
-             * Load the View with the extras
-             */
-            mPresenter = new DetailPresenter(this, this);
             mPresenter.loadMovie(getIntent());
         }
+
+        /**
+         * Load the View with the extras
+         */
+        mPresenter = new DetailPresenter(this, this);
     }
 
     @Override
@@ -108,7 +110,7 @@ public class DetailActivity extends AppCompatActivity implements DetailView, OnI
         Picasso.with(this).load(mMovie.smallImageUrl())
                 .into(mImgPoster);
         mTxtMovieOverview.setText(mMovie.getOverview());
-        mIsFavorite = mPresenter.getIffavorite(mMovie.id);
+        mPresenter.getIffavorite(mMovie.id);
 
         //Load movie videos
         mPresenter.loadMovieReviewsVideos(mMovie.id);
@@ -174,6 +176,11 @@ public class DetailActivity extends AppCompatActivity implements DetailView, OnI
     }
 
     @Override
+    public void isFavorite(boolean mFav) {
+        mIsFavorite = mFav;
+    }
+
+    @Override
     public void onFavoriteDeleted(boolean mError) {
         mIsFavorite = false;
         mutatefavoriteIcon();
@@ -199,8 +206,15 @@ public class DetailActivity extends AppCompatActivity implements DetailView, OnI
     @Override
     public void onItemClick(Object mObject, View mView) {
         if(mObject instanceof Video){
-            startActivity(new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("https://www.youtube.com/watch?v=" + ((Video) mObject).key)));
+            Intent mYoutubeIntent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("https://www.youtube.com/watch?v=" + ((Video) mObject).key));
+            if(mYoutubeIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(mYoutubeIntent);
+            }
+            else {
+                Toast.makeText(this, R.string.error_no_app_can_handle,
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

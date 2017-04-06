@@ -1,11 +1,9 @@
 package info.sergiomeza.popularmovies.presenter;
 
+import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
-
 import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +15,7 @@ import info.sergiomeza.popularmovies.model.Movie;
 import info.sergiomeza.popularmovies.ui.view.MainView;
 import info.sergiomeza.popularmovies.util.Const;
 import info.sergiomeza.popularmovies.util.Util;
+import io.reactivex.Single;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -31,7 +30,6 @@ public class MainPresenter {
     private Call<ApiResponse> mCall;
     private MainView mMainView;
     private Context mContext;
-
     /**
      * @param mMainView
      * @param mContext
@@ -107,34 +105,33 @@ public class MainPresenter {
      */
     public final void getFavoriteMovies(final boolean mRefresh){
         this.mMainView.showLoading(mRefresh);
-        Gson mGson = new Gson();
-        List<Movie> mFavorites = new ArrayList<>();
-        boolean mResponse;
-        try {
-            Cursor mCursor = mContext.getContentResolver()
-                    .query(MoviesContract.FavoritesEntry.CONTENT_URI, null, null, null, null);
-            if(mCursor.getCount() > 0) {
-                Log.i("CURSOS", "ENTRA");
-                while (mCursor.moveToNext()) {
-                    Movie mMovie = mGson.fromJson(mCursor.getString(
-                            mCursor.getColumnIndex(MoviesContract.FavoritesEntry.COLUMN_MOVIE_DATA)),
-                            Movie.class);
-                    mFavorites.add(mMovie);
+        AsyncQueryHandler mAsyncQuery = new AsyncQueryHandler(mContext.getContentResolver()){
+            @Override
+            protected void onQueryComplete(int token, Object cookie, Cursor mCursor) {
+                super.onQueryComplete(token, cookie, mCursor);
+                boolean mResponse;
+                Gson mGson = new Gson();
+                List<Movie> mFavorites = new ArrayList<>();
+                if(mCursor.getCount() > 0) {
+                    while (mCursor.moveToNext()) {
+                        Movie mMovie = mGson.fromJson(mCursor.getString(
+                                mCursor.getColumnIndex(MoviesContract.FavoritesEntry.COLUMN_MOVIE_DATA)),
+                                Movie.class);
+                        mFavorites.add(mMovie);
+                    }
+                    mMainView.onFavoritesSuccess(mFavorites);
+                    mResponse = false;
                 }
-                mMainView.onFavoritesSuccess(mFavorites);
-                mResponse = false;
-            }
-            else {
-                mResponse = true;
-                mMainView.onRequestError(mContext.getString(R.string.error_no_data,
-                        mContext.getString(R.string.favorites)));
-            }
-        } catch (Exception mException){
-            mResponse = true;
-            mMainView.onRequestError(mContext.getString(R.string.error_request,
-                    mException.getCause()));
-        }
+                else {
+                    mResponse = true;
+                    mMainView.onRequestError(mContext.getString(R.string.error_no_data,
+                            mContext.getString(R.string.favorites)));
+                }
 
-        mMainView.hideLoading(mResponse);
+                mMainView.hideLoading(mResponse);
+            }
+        };
+        mAsyncQuery.startQuery(88, null, MoviesContract.FavoritesEntry.CONTENT_URI, null, null,
+                null, null);
     }
 }

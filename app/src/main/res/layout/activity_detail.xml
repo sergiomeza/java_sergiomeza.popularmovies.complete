@@ -79,8 +79,6 @@
                         android:layout_height="180dp"
                         android:layout_weight="0.7"
                         android:clickable="true"
-                        android:paddingRight="10dp"
-                        android:transitionName="@string/transition_image"
                         android:src="@mipmap/ic_launcher"
                         android:contentDescription="@string/app_name" />
 
@@ -97,8 +95,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline"
-                            android:textSize="22sp"
-                            android:fontFamily="sans-serif-normal"
+                            android:textSize="@dimen/title_text_size"
                             android:textStyle="bold" />
 
                         <TextView
@@ -106,8 +103,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline"
-                            android:textSize="19sp"
-                            android:fontFamily="sans-serif-normal"
+                            android:textSize="@dimen/subtitle_text_size"
                             android:textStyle="bold"
                             android:textColor="@android:color/darker_gray" />
 
@@ -118,8 +114,7 @@
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline"
                             android:drawableLeft="@drawable/ic_star_border_teal_500_24dp"
                             android:drawablePadding="5dp"
-                            android:textSize="19sp"
-                            android:fontFamily="sans-serif-normal" />
+                            android:textSize="@dimen/subtitle_text_size" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -129,8 +124,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline"
                     android:textSize="18sp"
-                    android:paddingTop="10dp"
-                    android:fontFamily="sans-serif-normal" />
+                    android:paddingTop="10dp" />
 
                 <View
                     android:layout_width="match_parent"

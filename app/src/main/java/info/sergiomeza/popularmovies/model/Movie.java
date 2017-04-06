@@ -138,4 +138,6 @@ public class Movie implements Parcelable {
         parcel.writeString(backdrop_path);
         parcel.writeDouble(vote_average);
     }
+
+
 }

@@ -18,4 +18,5 @@
     <string name="play">play</string>
     <string name="reviews">Reviews</string>
     <string name="error_no_data">There is not data in %1$s</string>
+    <string name="error_no_app_can_handle">We can\'t open the video because your device can\'t handle the request</string>
 </resources>

@@ -13,6 +13,9 @@ public class Const {
     public static final String API_KEY = "<YOUR_API_KEY>";
     public static final String DETAIL_DATA = "MOVIE_DATA";
 
+    /**
+     * I know the problem with the enums, last time i will be using it :)
+     */
     public enum ApiMethods {
         POPULAR("POPULAR"),
         TOP_RATED("TOP"),

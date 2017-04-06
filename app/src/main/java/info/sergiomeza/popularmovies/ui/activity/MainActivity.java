@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -47,24 +48,32 @@ public class MainActivity extends AppCompatActivity implements MainView,
     @BindView(R.id.mSwipe) SwipeRefreshLayout mSwipe;
     @BindView(R.id.mProgressBar) ProgressBar mProgressBar;
 
+    private static final String MOVIE_LIST_STORE = "MOVIE_STORE";
+    private static final String TITLE_TYPE_STATE = "TITLE_SELECTED";
+    private String SELECTED_TYPE_TITLE_STATE = "";
+    private ArrayList<Movie> mListMovie;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //Inject butterknife into the view
         ButterKnife.bind(this);
+        mPresenter = new MainPresenter(this, this);
 
-        if(savedInstanceState == null){
-            //Init the recyclerView
-            final int columns = getResources().getInteger(R.integer.gallery_columns);
-            mRecycler.setHasFixedSize(true);
-            GridLayoutManager mGridLayoutManager = new GridLayoutManager(this, columns);
-            mGridLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-            mRecycler.setLayoutManager(mGridLayoutManager);
-            mRecycler.setItemAnimator(new DefaultItemAnimator());
-            mRecycler.setAdapter(mAdapter);
+        final int columns = getResources().getInteger(R.integer.gallery_columns);
+        mRecycler.setHasFixedSize(true);
+        GridLayoutManager mGridLayoutManager = new GridLayoutManager(this, columns);
+        mGridLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mRecycler.setLayoutManager(mGridLayoutManager);
+        mRecycler.setItemAnimator(new DefaultItemAnimator());
+        mRecycler.setAdapter(mAdapter);
 
-            mPresenter = new MainPresenter(this, this);
+        if(savedInstanceState != null){
+            mListMovie = savedInstanceState.getParcelableArrayList(MOVIE_LIST_STORE);
+            mAdapter = new MainAdapter(this, mListMovie);
+        } else {
+            mPresenter.getMovies(1, false, mMethodSelected);
         }
 
         /*
@@ -96,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements MainView,
         else
             mPresenter.getMovies(1, false, mMethod);
         this.setTitle(mMenuItem.getTitle());
+        SELECTED_TYPE_TITLE_STATE = mMenuItem.getTitle().toString();
         mMethodSelected = mMethod;
         mMenuItem.setChecked(true);
 
@@ -110,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements MainView,
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
-        setSelection(menu.findItem(R.id.menu_popular), mMethodSelected);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -184,16 +193,17 @@ public class MainActivity extends AppCompatActivity implements MainView,
             mAdapter = new MainAdapter(this, mResponse.getResults());
             mRecycler.setAdapter(mAdapter);
             mRecycler.getAdapter().notifyDataSetChanged();
+            mListMovie = new ArrayList<>(mResponse.getResults());
         }
     }
 
     @Override
     public void onFavoritesSuccess(List<Movie> mFavorites) {
-        Log.i("FAVS", mFavorites.size() + "");
         if(!mFavorites.isEmpty()){
             mAdapter = new MainAdapter(this, mFavorites);
             mRecycler.setAdapter(mAdapter);
             mRecycler.getAdapter().notifyDataSetChanged();
+            mListMovie = new ArrayList<>(mFavorites);
         }
     }
 
@@ -222,5 +232,40 @@ public class MainActivity extends AppCompatActivity implements MainView,
                 mView, getString(R.string.transition_image));
         ActivityCompat.startActivity(this,
                 mIntentDetail, options.toBundle());
+    }
+
+    /**
+     * When the user is on Favorites and resumes the activity, we fetch again the
+     * favorites list from DB
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(mMethodSelected.equals(Const.ApiMethods.FAVS.getState())){
+            mPresenter.getFavoriteMovies(true);
+        }
+    }
+
+    /**
+     * @param outState
+     * Saving the Current list of movies in the state with the title
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(MOVIE_LIST_STORE, mListMovie);
+        outState.putString(TITLE_TYPE_STATE, SELECTED_TYPE_TITLE_STATE);
+        super.onSaveInstanceState(outState);
+    }
+
+    /**
+     * @param savedInstanceState
+     * When the app restores the state, we add the list of movies to the adapter of recyclerView
+     * and set the title to the supportActionBar
+     */
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        mRecycler.setAdapter(mAdapter);
+        mRecycler.getAdapter().notifyDataSetChanged();
+        this.setTitle(savedInstanceState.getString(TITLE_TYPE_STATE));
     }
 }
