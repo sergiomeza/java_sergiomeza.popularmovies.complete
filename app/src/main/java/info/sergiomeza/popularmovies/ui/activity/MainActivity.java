@@ -77,7 +77,9 @@ public class MainActivity extends AppCompatActivity implements MainView,
 
         if(savedInstanceState != null){
             mListMovie = savedInstanceState.getParcelableArrayList(MOVIE_LIST_STORE);
-            mAdapter = new MainAdapter(this, mListMovie);
+            if (mListMovie != null) {
+                mAdapter = new MainAdapter(this, mListMovie);
+            }
         } else {
             mPresenter.getMovies(1, false, mMethodSelected);
         }
@@ -88,7 +90,6 @@ public class MainActivity extends AppCompatActivity implements MainView,
         mSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                onResume();
                 if(mMethodSelected.equals(Const.ApiMethods.FAVS.getState()))
                     mPresenter.getFavoriteMovies(true);
                 else
@@ -229,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements MainView,
          * We inflate the error view custom class into de Empty Linear layout of the XML file of
          * the activity passing the error string to display to the user
          */
+        mListMovie = null;
         mLinearError.removeAllViews();
         mLinearError.addView(new Util(this).inflateError(mErrorMessage));
         Toast.makeText(this, mErrorMessage, Toast.LENGTH_SHORT).show();
@@ -286,8 +288,10 @@ public class MainActivity extends AppCompatActivity implements MainView,
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         mListState = savedInstanceState.getParcelable(MOVIE_LIST_STORE_POSITION);
         mMenuSelected = savedInstanceState.getInt(MOVIE_TYPE_SELECTION);
-        mRecycler.setAdapter(mAdapter);
-        mRecycler.getAdapter().notifyDataSetChanged();
+        if (mListMovie != null){
+            mRecycler.setAdapter(mAdapter);
+            mRecycler.getAdapter().notifyDataSetChanged();
+        }
         this.setTitle(savedInstanceState.getString(TITLE_TYPE_STATE));
     }
 }
