@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import info.sergiomeza.popularmovies.Api;
+import info.sergiomeza.popularmovies.BuildConfig;
 import info.sergiomeza.popularmovies.R;
 import info.sergiomeza.popularmovies.data.MoviesContract;
 import info.sergiomeza.popularmovies.model.ApiResponse;
@@ -55,11 +56,11 @@ public class MainPresenter {
         if(new Util(this.mContext).isConnectedToInternet()){
             this.mMainView.showLoading(mRefresh);
             if(mMethod.equals(Const.ApiMethods.POPULAR.getState())){
-                this.mCall = api.getPopular(Const.API_KEY);
+                this.mCall = api.getPopular(BuildConfig.THE_MOVIE_DB_API_TOKEN);
             }
 
             if(mMethod.equals(Const.ApiMethods.TOP_RATED.getState())){
-                this.mCall = api.getTop(Const.API_KEY);
+                this.mCall = api.getTop(BuildConfig.THE_MOVIE_DB_API_TOKEN);
             }
 
             if(mCall != null){

@@ -87,14 +87,11 @@ public class DetailActivity extends AppCompatActivity implements DetailView, OnI
         initRecycler(mRecyclerVideos, mVideoAdapter);
         initRecycler(mRecyclerReviews, mReviewAdapter);
 
-        if (savedInstanceState == null) {
-            mPresenter.loadMovie(getIntent());
-        }
-
         /**
          * Load the View with the extras
          */
         mPresenter = new DetailPresenter(this, this);
+        mPresenter.loadMovie(getIntent());
     }
 
     @Override

@@ -10,7 +10,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class Const {
     public static final String API_BASE_URL = "https://api.themoviedb.org/3/movie/";
     public static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/";
-    public static final String API_KEY = "<YOUR_API_KEY>";
     public static final String DETAIL_DATA = "MOVIE_DATA";
 
     /**

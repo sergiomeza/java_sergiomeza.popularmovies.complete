@@ -2,6 +2,7 @@ package info.sergiomeza.popularmovies.ui.activity;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -49,9 +50,14 @@ public class MainActivity extends AppCompatActivity implements MainView,
     @BindView(R.id.mProgressBar) ProgressBar mProgressBar;
 
     private static final String MOVIE_LIST_STORE = "MOVIE_STORE";
+    private static final String MOVIE_LIST_STORE_POSITION = "MOVIE_POSITION";
     private static final String TITLE_TYPE_STATE = "TITLE_SELECTED";
-    private String SELECTED_TYPE_TITLE_STATE = "";
+    private static final String MOVIE_TYPE_SELECTION = "MOVIE_TYPE_SELE";
     private ArrayList<Movie> mListMovie;
+
+    GridLayoutManager mGridLayoutManager;
+    Parcelable mListState;
+    private int mMenuSelected = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements MainView,
 
         final int columns = getResources().getInteger(R.integer.gallery_columns);
         mRecycler.setHasFixedSize(true);
-        GridLayoutManager mGridLayoutManager = new GridLayoutManager(this, columns);
+        mGridLayoutManager = new GridLayoutManager(this, columns);
         mGridLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecycler.setLayoutManager(mGridLayoutManager);
         mRecycler.setItemAnimator(new DefaultItemAnimator());
@@ -105,9 +111,9 @@ public class MainActivity extends AppCompatActivity implements MainView,
         else
             mPresenter.getMovies(1, false, mMethod);
         this.setTitle(mMenuItem.getTitle());
-        SELECTED_TYPE_TITLE_STATE = mMenuItem.getTitle().toString();
         mMethodSelected = mMethod;
         mMenuItem.setChecked(true);
+        mMenuSelected = mMenuItem.getItemId();
 
         return true;
     }
@@ -120,6 +126,13 @@ public class MainActivity extends AppCompatActivity implements MainView,
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
+        /*
+         * Set selected the option if the mMenuSelected is saved in the saveInstance
+         */
+        if(mMenuSelected != 0){
+            MenuItem selected = menu.findItem(mMenuSelected);
+            selected.setChecked(true);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -241,6 +254,10 @@ public class MainActivity extends AppCompatActivity implements MainView,
     @Override
     protected void onResume() {
         super.onResume();
+        if(mListState != null){
+            mGridLayoutManager.onRestoreInstanceState(mListState);
+        }
+
         if(mMethodSelected.equals(Const.ApiMethods.FAVS.getState())){
             mPresenter.getFavoriteMovies(true);
         }
@@ -252,9 +269,12 @@ public class MainActivity extends AppCompatActivity implements MainView,
      */
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(MOVIE_LIST_STORE, mListMovie);
-        outState.putString(TITLE_TYPE_STATE, SELECTED_TYPE_TITLE_STATE);
         super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(MOVIE_LIST_STORE, mListMovie);
+        outState.putString(TITLE_TYPE_STATE, this.getTitle().toString());
+        outState.putInt(MOVIE_TYPE_SELECTION, mMenuSelected);
+        mListState = mGridLayoutManager.onSaveInstanceState();
+        outState.putParcelable(MOVIE_LIST_STORE_POSITION, mListState);
     }
 
     /**
@@ -264,6 +284,8 @@ public class MainActivity extends AppCompatActivity implements MainView,
      */
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        mListState = savedInstanceState.getParcelable(MOVIE_LIST_STORE_POSITION);
+        mMenuSelected = savedInstanceState.getInt(MOVIE_TYPE_SELECTION);
         mRecycler.setAdapter(mAdapter);
         mRecycler.getAdapter().notifyDataSetChanged();
         this.setTitle(savedInstanceState.getString(TITLE_TYPE_STATE));

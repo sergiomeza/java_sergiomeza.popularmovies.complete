@@ -12,6 +12,7 @@ import android.os.Looper;
 import com.google.gson.Gson;
 
 import info.sergiomeza.popularmovies.Api;
+import info.sergiomeza.popularmovies.BuildConfig;
 import info.sergiomeza.popularmovies.R;
 import info.sergiomeza.popularmovies.data.AsyncQueryHandlerDetail;
 import info.sergiomeza.popularmovies.data.MoviesContract;
@@ -117,8 +118,8 @@ public class DetailPresenter {
      */
     public void loadMovieReviewsVideos(int mMovieId){
         if(new Util(this.mContext).isConnectedToInternet()){
-            Observable.zip(api.getMovieVideos(mMovieId, Const.API_KEY),
-                    api.getMovieReviews(mMovieId, Const.API_KEY),
+            Observable.zip(api.getMovieVideos(mMovieId, BuildConfig.THE_MOVIE_DB_API_TOKEN),
+                    api.getMovieReviews(mMovieId, BuildConfig.THE_MOVIE_DB_API_TOKEN),
                     new BiFunction<ApiResponseVideos, ApiResponseReviews, ApiCombined>(){
                         @Override
                         public ApiCombined apply(ApiResponseVideos apiResponseVideos,
